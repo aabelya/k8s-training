@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: songs-pvc
+  namespace: k8s-program
+  labels:
+    app: songs-service
+spec:
+  storageClassName: manual
+  volumeName: songs-pv
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 50Mi

@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: resources-service-deployment
+  labels:
+    app: resources-service
+  namespace: k8s-program
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: resources-service
+  template:
+    metadata:
+      labels:
+        app: resources-service
+    spec:
+      containers:
+        - name: resources-service
+          image: localhost:5000/resources-image:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: RESOURCES_DB_URL
+              value: resources-pg-service
+            - name: SONGS_MS_URL
+              value: songs-service
