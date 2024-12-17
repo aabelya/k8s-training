@@ -7,6 +7,11 @@ metadata:
   namespace: k8s-program
 spec:
   replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
   selector:
     matchLabels:
       app: songs-service
@@ -17,15 +22,47 @@ spec:
     spec:
       containers:
         - name: songs-service
-          image: localhost:5000/songs-image:latest
+          image: localhost:5000/songs-image:2.0
           ports:
-            - containerPort: 8081
+            - name: app-port
+              containerPort: 8081
           volumeMounts:
             - mountPath: "/data"
               name: songs-pvs
           env:
             - name: SONGS_DB_URL
-              value: songs-pg-service
+              valueFrom:
+                configMapKeyRef:
+                  name: services-cm
+                  key: songsDbUrl
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-secret
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-secret
+                  key: password
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: app-port
+            failureThreshold: 1
+            periodSeconds: 3
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: app-port
+            failureThreshold: 180
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /actuator/beans
+              port: app-port
+            initialDelaySeconds: 5
+            periodSeconds: 5
       volumes:
         - name: songs-pvs
           persistentVolumeClaim:

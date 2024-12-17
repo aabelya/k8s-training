@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: services-cm
+  namespace: k8s-program
+data:
+  resourcesDbUrl: resources-pg-service
+  songsDbUrl: songs-pg-service
+  songsMsUrl: songs-service
+  init-song-db.sql: |    
+    DROP TABLE IF EXISTS songs CASCADE;
+    DROP SEQUENCE IF EXISTS songs_seq;
+    CREATE SEQUENCE songs_seq START WITH 1 INCREMENT BY 50;
+    CREATE TABLE songs (
+            id INTEGER NOT NULL,
+            resource_id INTEGER NOT NULL UNIQUE,
+            album VARCHAR(255),
+            artist VARCHAR(255),
+            length VARCHAR(255),
+            name VARCHAR(255),
+            year VARCHAR(255),
+            PRIMARY KEY (id)
+    );
+  init-resources-db.sql: |
+    DROP TABLE IF EXISTS resources CASCADE;
+    CREATE TABLE RESOURCES (
+        id SERIAL NOT NULL,
+        blob BYTEA,
+        PRIMARY KEY (id)
+    );
