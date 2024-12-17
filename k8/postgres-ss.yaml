@@ -22,17 +22,51 @@ spec:
           volumeMounts:
             - name: postgresql-db-disk
               mountPath: /data
+            - name: db-init
+              mountPath: /docker-entrypoint-initdb.d
           env:
             - name: POSTGRES_USER
-              value: "postgres"
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-secret
+                  key: username
             - name: POSTGRES_PASSWORD
-              value: "postgres"
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-secret
+                  key: password
             - name: POSTGRES_DB
               value: "postgres"
             - name: POSTGRES_PORT
               value: "5432"
             - name: PGDATA
               value: "/data/pgdata"
+          startupProbe:
+            exec:
+              command: [ "psql", "-w", "-U", "pgadmin", "-d", "postgres", "-c", "SELECT 1" ]
+            timeoutSeconds: 10
+            failureThreshold: 180
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command: [ "psql", "-w", "-U", "pgadmin", "-d", "postgres", "-c", "SELECT 1" ]
+            initialDelaySeconds: 15
+            timeoutSeconds: 10
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command: [ "psql", "-w", "-U", "pgadmin", "-d", "postgres", "-c", "SELECT 1" ]
+            timeoutSeconds: 10
+            periodSeconds: 10
+      volumes:
+        - name: db-init
+          configMap:
+            name: services-cm
+            items:
+              - key: "init-song-db.sql"
+                path: "init-song-db.sql"
+              - key: "init-resources-db.sql"
+                path: "init-resources-db.sql"
   volumeClaimTemplates:
     - metadata:
         name: postgresql-db-disk
