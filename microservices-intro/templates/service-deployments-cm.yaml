@@ -2,7 +2,8 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: services-cm
-  namespace: k8s-program
+  namespace: {{ .Values.namespace }}
+  {{- include "microservices-intro.labels" . | indent 2 }}
 data:
   resourcesDbUrl: resources-pg-service
   songsDbUrl: songs-pg-service
