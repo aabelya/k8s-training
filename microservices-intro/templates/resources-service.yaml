@@ -6,8 +6,7 @@ metadata:
 spec:
   selector:
     app: resources-service
-  type: NodePort
+  type: ClusterIP
   ports:
     - protocol: TCP
       port: 8080
-      nodePort: 30030

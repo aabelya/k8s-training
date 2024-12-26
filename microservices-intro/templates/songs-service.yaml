@@ -6,8 +6,7 @@ metadata:
 spec:
   selector:
     app: songs-service
-  type: NodePort
+  type: ClusterIP
   ports:
     - protocol: TCP
       port: 8081
-      nodePort: 30031
